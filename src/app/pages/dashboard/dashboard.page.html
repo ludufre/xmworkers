@@ -1,0 +1,182 @@
+<div class="container-fluid">
+  <div class="alert alert-danger" role="alert" *ngIf="runtime.workers.length === 0">
+    <fa-icon icon="exclamation-triangle"></fa-icon> No workers found, <a (click)="openAddModal()"
+      class="alert-link">add</a> at least
+    one.
+  </div>
+
+  <ng-template [ngIf]="runtime.workers.length > 0">
+    <div class="card mb-2">
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <tbody>
+            <tr>
+              <td style="line-height: 1.3;">
+                <div class="d-flex flex-wrap justify-content-center text-monospace">
+                  <div class="pr-2">
+                    <small class="text-muted">workers</small><br>
+                    <b [class.text-danger]="workersCount() === 0"
+                      [class.text-warning]="workersCount() > 0 && workersCount() !== runtime.workers.length"
+                      [class.text-success]="workersCount() > 0 && workersCount() === runtime.workers.length">
+                      {{ workersCount() }}/{{ runtime.workers.length }}
+                      <span class="badge" [class.badge-danger]="workersCount() === 0"
+                        [class.badge-warning]="workersCount() > 0 && workersCount() !== runtime.workers.length"
+                        [class.badge-success]="workersCount() > 0 && workersCount() === runtime.workers.length">{{
+                        (workersCount() / runtime.workers.length * 100).toFixed(0)
+                        }}%</span>
+                    </b>
+                  </div>
+                </div>
+              </td>
+              <td style="line-height: 1.3;">
+                <div class="d-flex flex-wrap justify-content-center text-monospace">
+                  <div class="pr-2" *ngFor="let t of ['10s sum.', '1m sum.', '15m sum.']; let i = index">
+                    <small class="text-muted">{{ t }}</small><br>
+                    <hashrate [value]="sum(i)"></hashrate>
+                  </div>
+
+                  <div class="pr-2">
+                    <small class="text-muted">highest</small><br>
+                    <hashrate [value]="sum(-1)" type="secondary"></hashrate>
+                  </div>
+                </div>
+              </td>
+
+              <td style="line-height: 1.3;">
+                <div class="d-flex flex-wrap justify-content-center text-monospace">
+                  <div class="pr-2">
+                    <small class="text-muted">count</small><br>
+                    <span class="badge" [class.badge-success]="resultsGood()" [class.badge-info]="!resultsGood()">{{
+                      resultsGood() }}</span>/<span class="badge" [class.badge-success]="!resultsBad()"
+                      [class.badge-danger]="resultsBad()">{{ resultsBad() }}</span>
+                  </div>
+                  <div>
+                    <small class="text-muted">avg time</small><br>
+                    <span class="badge"
+                      [class.badge-info]="resultsAvg() === 0 || (resultsAvg() >= 10 && resultsAvg() <= 120)"
+                      [class.badge-warning]="resultsAvg() > 0 && (resultsAvg() < 10 || resultsAvg() > 120)">{{
+                      resultsAvg() === 0 ? 'n/a' : resultsAvg().toFixed(0) + 's' }}</span>
+                  </div>
+                </div>
+              </td>
+
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="alert alert-warning mb-2" role="alert" *ngIf="runtime.outdated">
+      <fa-icon icon="exclamation-triangle"></fa-icon> XMRig v{{ runtime.latest }} avaiable to download at <a
+        href="https://github.com/xmrig/xmrig/releases" target="_blank"
+        class="alert-link">https://github.com/xmrig/xmrig/releases</a>.
+    </div>
+
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table table-striped table-hover mb-0">
+          <thead>
+            <tr>
+              <th class="border-0">Workers</th>
+              <th class="border-0">Hashrate</th>
+              <th class="border-0">Results</th>
+              <th class="border-0">Pool</th>
+              <th class="border-0"><button class="btn btn-sm btn-outline-info"
+                  style="margin-top: -5px; margin-bottom: -5px;" (click)="runtime.getWorkers()">
+                  <fa-icon icon="sync-alt"></fa-icon>
+                </button></th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-template ngFor let-worker [ngForOf]="runtime.workers | orderBy : 'id'" [ngForTrackBy]="workerTrackBy">
+              <tr [class.table-danger]="worker.status === 2"
+                [class.table-warning]="worker.status === 1 || worker.paused">
+                <td style="line-height: 1.3;">
+                  <div>
+                    <a class="font-weight-bold" (click)="openWorker(worker)">{{ worker.id }}</a>
+                  </div>
+                  <div>
+                    <span class="badge badge-primary s">{{ worker?.summary?.kind !== 'miner' ? worker?.summary?.kind :
+                      ''
+                      }}</span>
+                    <span class="badge badge-info s"
+                      [class.badge-warning]="!!runtime.latest && worker.version !== runtime.latest">{{ worker.version
+                      }}</span>
+                    <span class="badge badge-dark s">{{ worker?.summary?.algo }}</span>
+                    <small class="text-muted">{{ worker.url.replace('http://', '') }}</small>
+                  </div>
+                </td>
+
+                <td style="line-height: 1.3;" *ngIf="!!worker?.summary?.hashrate">
+                  <div class="d-flex flex-wrap text-monospace">
+                    <div class="pr-2" *ngFor="let t of ['10s', '1m', '15m']; let i = index">
+                      <small class="text-muted">{{ t }}</small><br>
+                      <hashrate [value]="worker?.summary?.hashrate?.total[i]"></hashrate>
+                    </div>
+
+                    <div class="pr-2">
+                      <small class="text-muted">highest</small><br>
+                      <hashrate [value]="worker?.summary?.hashrate?.highest" type="secondary"></hashrate>
+                    </div>
+                  </div>
+                </td>
+                <td *ngIf="!!!worker?.summary?.hashrate"><span class="badge badge-danger">n/a</span></td>
+
+                <td style="line-height: 1.3;" *ngIf="!!worker?.summary?.results">
+                  <div class="d-flex flex-wrap text-monospace">
+                    <div class="pr-2">
+                      <small class="text-muted">count</small><br>
+                      <span class="badge" [class.badge-success]="worker.summary.results.shares_good"
+                        [class.badge-info]="!worker.summary.results.shares_good">{{ worker.summary.results.shares_good
+                        }}</span>/<span class="badge" [class.badge-success]="!(worker.summary.results.shares_total -
+                        worker.summary.results.shares_good)" [class.badge-danger]="(worker.summary.results.shares_total -
+                        worker.summary.results.shares_good)">{{ (worker.summary.results.shares_total -
+                        worker.summary.results.shares_good) }}</span>
+                    </div>
+                    <div>
+                      <small class="text-muted">avg time</small><br>
+                      <span class="badge"
+                        [class.badge-info]="worker.summary.results.avg_time === 0 || (worker.summary.results.avg_time >= 10 && worker.summary.results.avg_time <= 120)"
+                        [class.badge-warning]="worker.summary.results.avg_time > 0 && (worker.summary.results.avg_time < 10 || worker.summary.results.avg_time > 120)">{{
+                        worker.summary.results.avg_time === 0 ? 'n/a' : worker.summary.results.avg_time + 's' }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td *ngIf="!!!worker?.summary?.results"><span class="badge badge-danger">n/a</span></td>
+
+                <td style="line-height: 1.3;"
+                  *ngIf="!!worker?.summary?.connection && worker?.summary?.connection?.uptime > 0">
+                  <b>{{ worker.summary.connection.pool }}</b><br>
+                  <span class="badge badge-success s" *ngIf="!!worker.summary.connection?.tls">{{
+                    worker.summary.connection.tls }}</span>
+                  <small class="text-muted s">diff</small>
+                  <span class="badge badge-info">{{ worker.summary.connection.diff }}</span>
+                </td>
+                <td *ngIf="!!!worker?.summary?.connection || worker?.summary?.connection?.uptime === 0"><span
+                    class="badge badge-danger">n/a</span></td>
+
+                <td style="line-height: 1.3;">
+                  <button class="btn btn-sm btn-info text-white"
+                    *ngIf="!!!worker?.summary || worker?.actionsLoading === true">
+                    <fa-icon icon="spinner" [spin]="true"></fa-icon>
+                  </button>
+                  <ng-template
+                    [ngIf]="!!worker?.summary && (!!!worker?.actionsLoading || worker?.actionsLoading === false)">
+                    <button class="btn btn-sm btn-warning text-white" (click)="actions(worker, 1)"
+                      *ngIf="!worker?.summary?.paused">
+                      <fa-icon icon="pause"></fa-icon>
+                    </button>
+                    <button class="btn btn-sm btn-success text-white" (click)="actions(worker, 2)"
+                      *ngIf="worker?.summary?.paused">
+                      <fa-icon icon="play"></fa-icon>
+                    </button>
+                  </ng-template>
+                </td>
+              </tr>
+            </ng-template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-template>
+</div>

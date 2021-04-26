@@ -1,0 +1,184 @@
+<div class="card mb-3" [class.border-danger]="!!!worker?.summary">
+  <h5 class="card-header" [class.bg-danger]="!!!worker?.summary" [class.text-white]="!!!worker?.summary">Worker
+    <span class="badge badge-primary" *ngIf="!!worker?.summary && worker.summary.kind !== 'miner'">{{
+      worker.summary.kind }}</span>
+    <div class="btn-group float-right">
+      <a class="btn" [class.btn-outline-primary]="!!worker?.summary" [class.btn-primary]="!!!worker?.summary"
+        title="Edit worker" (click)="events.publish('menu:open', '/edit')">
+        <fa-icon icon="pen"></fa-icon>
+      </a><button class="btn" [class.btn-outline-primary]="!!worker?.summary" [class.btn-primary]="!!!worker?.summary"
+        title="Refresh" (click)="refresh()">
+        <fa-icon icon="sync-alt"></fa-icon>
+      </button>
+    </div>
+  </h5>
+  <div class="card-body text-danger" *ngIf="!!!worker?.summary">
+    <fa-icon icon="exclamation-triangle"></fa-icon> Failed to fetch summary information.
+  </div>
+  <div class="table-responsive" *ngIf="!!worker?.summary">
+    <table class="table table-hover mb-0">
+      <tbody>
+        <tr>
+          <td class="border-top-0 text-muted" style="width: 120px;">Version</td>
+          <td class="border-top-0 font-weight-bold"><span class="badge badge-primary s">{{
+              worker.summary.version }}</span> <span class="badge s" [class.badge-success]="worker.summary.cpu.x64"
+              [class.badge-danger]="!worker.summary.cpu.x64">{{
+              (worker.summary.cpu.x64 ? '64' : '32') +
+              '-bit' }}</span> <small class="text-muted">{{ worker.summary.ua }}</small></td>
+        </tr>
+        <tr>
+          <td class="text-muted">CPU</td>
+          <td><a (click)="modalService.open(modal)" class="s">{{ worker.summary.cpu.brand }}</a> <span class="badge s"
+              [class.badge-success]="worker.summary.cpu.aes" [class.badge-danger]="!worker.summary.cpu.aes">AES</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="text-muted">Uptime</td>
+          <td><span [title]="worker.summary.uptime + 's'">{{ datetime(worker.summary.uptime) }}</span></td>
+        </tr>
+        <tr [class.table-danger]="worker.summary.donate_level < 1">
+          <td [class.text-muted]="worker.summary.donate_level >= 1"
+            [class.text-danger]="worker.summary.donate_level < 1">Donate</td>
+          <td [class.text-success]="worker.summary.donate_level >= 1"
+            [class.text-danger]="worker.summary.donate_level < 1">{{ worker.summary.donate_level + '%' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<ng-template [ngIf]="!!worker?.summary">
+  <div class="card mb-3" [class.border-danger]="!isMiningOk(worker.summary)">
+    <h5 class="card-header" [class.bg-danger]="!isMiningOk(worker.summary)"
+      [class.text-white]="!isMiningOk(worker.summary)">
+      Mining<div class="btn-group float-right"><a class="btn" [class.btn-outline-light]="!isMiningOk(worker.summary)"
+          [class.btn-outline-primary]="isMiningOk(worker.summary)" title="Backends"
+          (click)="events.publish('menu:open', '/backends')">
+          <fa-icon icon="microchip"></fa-icon>
+        </a></div>
+    </h5>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <tbody>
+          <tr>
+            <td class="border-top-0 text-muted" style="width: 120px;">Hashrate</td>
+            <td class="border-top-0">
+              <ng-template ngFor let-t [ngForOf]="['10s', '1m', '15m']" let-i="index">
+                <small class="text-muted s">{{ t }}</small>
+                <hashrate [value]="worker?.summary?.hashrate?.total[i]" class="s"></hashrate>
+              </ng-template>
+
+              <small class="text-muted s">highest</small>
+              <hashrate [value]="worker?.summary?.hashrate?.highest" type="secondary" class="s"></hashrate>
+            </td>
+          </tr>
+          <tr>
+            <td class="text-muted">Results</td>
+            <td>
+              <small class="text-muted s">accepted</small>
+              <span class="badge s" [class.badge-success]="worker.summary.results.shares_good"
+                [class.badge-info]="!worker.summary.results.shares_good">{{ worker.summary.results.shares_good
+                }}</span>
+
+              <small class="text-muted s">rejected</small>
+              <span class="badge s" [class.badge-success]="!(worker.summary.results.shares_total -
+                          worker.summary.results.shares_good)" [class.badge-danger]="(worker.summary.results.shares_total -
+                          worker.summary.results.shares_good)">{{ (worker.summary.results.shares_total -
+                worker.summary.results.shares_good) }}</span>
+
+              <small class="text-muted s">avg time</small>
+              <span class="badge s"
+                [class.badge-info]="worker.summary.results.avg_time === 0 || (worker.summary.results.avg_time >= 10 && worker.summary.results.avg_time <= 120)"
+                [class.badge-warning]="worker.summary.results.avg_time > 0 && (worker.summary.results.avg_time < 10 || worker.summary.results.avg_time > 120)">{{
+                worker.summary.results.avg_time === 0 ? 'n/a' : worker.summary.results.avg_time + 's'
+                }}</span>
+
+              <small class="text-muted s">hashes total</small> <span class="badge badge-info">{{
+                worker.summary.results.hashes_total }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card mb-3" [class.border-danger]="!isConnectionOk(worker.summary)">
+    <h5 class="card-header" [class.bg-danger]="!isConnectionOk(worker.summary)"
+      [class.text-white]="!isConnectionOk(worker.summary)">Connection</h5>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <tbody>
+          <tr>
+            <td class="border-top-0 text-muted" style="width: 120px;">Pool</td>
+            <td class="border-top-0"><b class="s">{{ worker.summary?.connection?.pool }}</b> <span
+                class="badge badge-success s" *ngIf="!!worker.summary?.connection?.tls">{{
+                worker.summary?.connection?.tls }}</span>
+              <small class="text-muted s">diff</small> <span class="badge badge-info s">{{
+                worker.summary?.results?.diff_current }}</span> <small class="text-muted s">algo</small> <span
+                class="badge badge-dark s">{{ worker.summary?.algo?.replace('cryptonight', 'cn') }}</span>
+              <small class="text-muted s">ping</small> <span class="badge"
+                [class.badge-info]="worker.summary?.connection?.ping === 0"
+                [class.badge-success]="worker.summary?.connection?.ping < 100"
+                [class.badge-warning]="worker.summary?.connection?.ping >= 100 && worker.summary?.connection?.ping < 500"
+                [class.badge-danger]="worker.summary?.connection?.ping >= 500">
+                <fa-icon icon="infinity" *ngIf="worker.summary?.connection?.ping === 0"></fa-icon> {{
+                worker.summary?.connection?.ping > 0 ? worker.summary?.connection?.ping + 'ms' : '' }}
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td class="text-muted">Uptime</td>
+            <td><span [title]="worker.summary.uptime + 's'">{{ datetime(worker.summary.uptime) }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #modal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">{{ worker?.summary?.cpu?.brand }}</h5><button type="button" class="close"
+      (click)="modal.close()"><span>×</span></button>
+  </div>
+  <div class="modal-body p-0">
+    <table class="table table-hover table-sm mb-0">
+      <tbody>
+        <tr>
+          <td class="border-top-0 text-muted pl-3" style="width: 120px;">features</td>
+          <td class="border-top-0" colspan="3">
+            <span class="badge s" [class.badge-success]="worker?.summary?.cpu?.x64"
+              [class.badge-danger]="!worker?.summary?.cpu?.x64">x64</span>
+            <span class="badge s" [class.badge-success]="worker?.summary?.cpu?.aes"
+              [class.badge-danger]="!worker?.summary?.cpu?.aes">AES</span>
+            <span class="badge" [class.badge-success]="worker?.summary?.cpu?.avx2"
+              [class.badge-danger]="!worker?.summary?.cpu?.avx2">AVX2</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="text-muted pl-3" style="width: 120px;">cache</td>
+          <td colspan="3"><span class="text-muted s">L2</span> <span class="badge badge-info s">{{
+              g.formatBytes(worker?.summary?.cpu?.l2) }}</span> <span class="text-muted s">L3</span> <span
+              class="badge badge-info s">{{ g.formatBytes(worker?.summary?.cpu?.l3) }}</span></td>
+        </tr>
+        <tr>
+          <td class="text-muted pl-3" style="width: 120px;">cores</td>
+          <td><span class="badge badge-dark">{{ worker?.summary?.cpu?.cores }}</span></td>
+          <td class="text-muted pl-3" style="width: 120px;">threads</td>
+          <td><span class="badge badge-dark">{{ worker?.summary?.cpu?.threads }}</span></td>
+        </tr>
+        <tr>
+          <td class="text-muted pl-3" style="width: 120px;">packages</td>
+          <td><span class="badge badge-info">{{ worker?.summary?.cpu?.packages }}</span></td>
+          <td class="text-muted pl-3" style="width: 120px;">NUMA nodes</td>
+          <td><span class="badge s" [class.badge-info]="worker?.summary?.cpu?.nodes > 0"
+              [class.badge-warning]="worker?.summary?.cpu?.nodes === 0">{{ worker?.summary?.cpu?.nodes }}</span></td>
+        </tr>
+        <tr>
+          <td class="text-muted pl-3" style="width: 120px;">backend</td>
+          <td colspan="3">{{ worker?.summary?.cpu?.backend }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="modal-footer"><button type="button" class="btn btn-secondary hidden-xs"
+      (click)="modal.close()">Close</button></div>
+</ng-template>

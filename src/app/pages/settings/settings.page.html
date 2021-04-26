@@ -1,0 +1,15 @@
+<div class="container">
+  <h2>Settings <button class="btn btn-secondary float-right" (click)="export()">Export</button></h2>
+  <div class="card bg-light shadow-sm mb-4">
+    <div class="card-body">
+      <div class="form-group row mb-0"><label for="interval" class="col-lg-3 col-form-label">Refresh interval</label>
+        <div class="col-lg-9">
+          <div class="input-group" style="max-width: 256px;"><input type="number" class="form-control"
+              [(ngModel)]="refresh" (ngModelChange)="onChange($event)" min="1" value="5">
+            <div class="input-group-append"><span class="input-group-text">Seconds</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

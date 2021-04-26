@@ -1,0 +1,18 @@
+<ng-template #modal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Export settings and workers</h5><button type="button" class="close"
+      (click)="modal.close()"><span>×</span></button>
+  </div>
+  <div class="alert alert-warning rounded-0 mb-0">Copy url below and open it on another browser to import.</div>
+  <div class="modal-body">
+    <pre id="url">{{ url }}</pre>
+  </div>
+  <div class="modal-footer">
+    <button title="Copy" type="button" class="btn btn-success" (click)="copy()">
+      <span>
+        <fa-icon icon="copy"></fa-icon> Copy &amp; Close
+      </span>
+    </button>
+    <button type="button" class="btn btn-secondary hidden-xs" (click)="modal.close()">Close</button>
+  </div>
+</ng-template>

@@ -1,0 +1,26 @@
+<div class="container-fluid">
+  <div class="alert alert-info" role="alert" *ngIf="!!!runtime.viewing">
+    <fa-icon icon="spinner" [spin]="true"></fa-icon> Loading...
+  </div>
+  <div class="d-flex" *ngIf="!!runtime.viewing">
+    <div class="mr-3">
+      <div>
+        <div class="card mb-3" style="width: 16rem;" *ngFor="let menu of menus">
+          <h5 class="card-header" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+            *ngIf="!!menu.title">
+            {{ menu.title }}
+          </h5>
+          <div class="list-group list-group-flush" *ngIf="menu.entries.length > 0">
+            <a class="list-group-item" [class.active]="entry?.active === true" *ngFor="let entry of menu.entries"
+              (click)="open(entry)">
+              <fa-icon [icon]="entry.icon"></fa-icon> {{ entry.label }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flex-grow-1">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

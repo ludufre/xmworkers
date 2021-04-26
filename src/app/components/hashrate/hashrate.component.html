@@ -1,0 +1,4 @@
+<span class="badge" [class]="class" [class.badge-primary]="type === 'primary' && !!value && value >= .01"
+  [class.badge-secondary]="type === 'secondary' && !!value && value >= .01"
+  [class.badge-danger]="!!!value || value < .01">{{
+  !!!value || value < .01 ? 'n/a' : value.toFixed(2) }}</span>

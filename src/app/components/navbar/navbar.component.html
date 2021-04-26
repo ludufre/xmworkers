@@ -1,0 +1,43 @@
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+  <a class="navbar-brand mb-0 h1" [routerLink]="['/dashboard']">
+    <img src="assets/favicon.png" width="30" height="30" alt="XMWorkers Dashboard" class="d-inline-block align-top">
+    XMWorkers
+  </a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" (click)="collapsed = !collapsed">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" [class.show]="!collapsed">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link nav-link-icon" [routerLink]="['/settings']">
+          <fa-icon icon="cog" size="lg"></fa-icon>
+        </a>
+      </li>
+    </ul>
+    <ul class="navbar-nav flex-row d-none d-md-flex">
+      <li class="nav-item">
+        <a class="nav-link nav-link-icon" target="_blank" title="Twitter" href="https://twitter.com/xmrig_dev">
+          <fa-icon [icon]="['fab', 'twitter']" size="lg"></fa-icon>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link nav-link-icon" target="_blank" title="reddit" href="https://www.reddit.com/u/XMRig">
+          <fa-icon [icon]="['fab', 'reddit']" size="lg"></fa-icon>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link nav-link-icon" target="_blank" title="Telegram" href="https://t.me/xmrig">
+          <fa-icon [icon]="['fab', 'telegram']" size="lg"></fa-icon>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link nav-link-icon" target="_blank" title="GitHub" href="https://github.com/xmrig/xmrig">
+          <fa-icon [icon]="['fab', 'github']" size="lg"></fa-icon>
+        </a>
+      </li>
+    </ul>
+    <ul class="navbar-nav flex-row"><button class="btn btn-success ml-md-3" (click)="openAddModal()" type="button">
+        <fa-icon icon="plus"></fa-icon> Add
+      </button></ul>
+  </div>
+</nav>

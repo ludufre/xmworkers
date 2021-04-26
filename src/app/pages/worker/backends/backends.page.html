@@ -1,0 +1,103 @@
+<div class="alert alert-danger" *ngIf="loaded && (!!!worker?.backends || worker.backends.length === 0)">
+  <fa-icon icon="exclamation-triangle"></fa-icon>
+  Backends information is not available.
+</div>
+<div class="text-muted text-center" *ngIf="!loaded">
+  <fa-icon icon="spinner" [spin]="true" size="3x"></fa-icon>
+</div>
+<div class="card mb-3" *ngIf="loaded && !!worker?.backends && worker.backends.length > 0">
+  <h5 class="card-header card-header">
+    CPU
+    <div class="btn-group float-right">
+      <button class="btn btn-outline-primary" title="Refresh" (click)="job()">
+        <fa-icon icon="sync-alt"></fa-icon>
+      </button>
+    </div>
+    <div class="float-right mr-3" *ngIf="!!worker.backends[0]?.hashrate && !!worker.backends[0]?.hashrate[0]">
+      <ng-template ngFor let-t [ngForOf]="['10s', '1m', '15m']" let-i="index">
+        <small class="text-muted s">{{ t }}</small>
+        <hashrate [value]="worker?.backends[0]?.hashrate[i]" class="s"></hashrate>
+      </ng-template>
+    </div>
+  </h5>
+  <div class="card-body d-flex flex-wrap">
+    <div class="mr-4">
+      <span class="text-muted">profile</span><br>
+      <span class="badge badge-primary s">{{ worker.backends[0]?.profile }}</span>
+      <span class="badge badge-dark">{{ worker.backends[0]?.algo }}</span>
+    </div>
+    <div class="mr-4">
+      <span class="text-muted">huge pages</span><br>
+
+      <b class="text-danger" *ngIf="worker.backends[0]?.hugepages[0] === 0">
+        {{ worker.backends[0]?.hugepages[0] }}/{{ worker.backends[0]?.hugepages[1] }}
+        <span class="badge badge-danger">0%</span>
+      </b>
+
+      <b class="text-success"
+        *ngIf="worker.backends[0]?.hugepages[0] > 0 && worker.backends[0]?.hugepages[0] ===  worker.backends[0]?.hugepages[1]">
+        {{ worker.backends[0]?.hugepages[0] }}/{{ worker.backends[0]?.hugepages[1] }}
+        <span class="badge badge-success">100%</span>
+      </b>
+
+      <b class="text-warning"
+        *ngIf="worker.backends[0]?.hugepages[0] > 0 && worker.backends[0]?.hugepages[0] !==  worker.backends[0]?.hugepages[1]">
+        {{ worker.backends[0]?.hugepages[0] }}/{{ worker.backends[0]?.hugepages[1] }}
+        <span class="badge badge-warning">{{ (worker.backends[0]?.hugepages[0] / worker.backends[0]?.hugepages[1] *
+          100).toFixed(0) }}%</span>
+      </b>
+    </div>
+    <div class="mr-4">
+      <span class="text-muted">memory</span><br>
+      <b class="text-info">{{ g.formatBytes(worker.backends[0]?.memory, 0) }}</b>
+    </div>
+    <div class="mr-4">
+      <span class="text-muted">aes</span><br>
+      <span [class.text-success]="worker.backends[0]['hw-aes']" [class.text-danger]="!worker.backends[0]['hw-aes']">
+        <fa-icon [icon]="worker.backends[0]['hw-aes'] ? 'check-circle': 'times-circle'"></fa-icon>
+      </span>
+    </div>
+    <div class="mr-4">
+      <span class="text-muted">asm</span><br>
+      <b class="text-success" *ngIf="!!worker.backends[0]?.asm">{{ worker.backends[0]?.asm }}</b>
+      <b class="text-danger" *ngIf="!!!worker.backends[0]?.asm">
+        <fa-icon icon="times-circle"></fa-icon>
+      </b>
+    </div>
+    <div class="mr-4">
+      <span class="text-muted">priority</span><br>
+      {{ priority(worker.backends[0]?.priority) }}
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover table-sm table-striped mb-0">
+      <thead>
+        <tr>
+          <th class="border-bottom-0 pl-4"># <span class="badge badge-dark">{{ worker.backends[0]?.threads?.length
+              }}</span></th>
+          <th class="border-bottom-0 font-weight-normal">intensity</th>
+          <th class="border-bottom-0 font-weight-normal">affinity</th>
+          <th class="border-bottom-0 font-weight-normal">10s</th>
+          <th class="border-bottom-0 font-weight-normal">1m</th>
+          <th class="border-bottom-0 font-weight-normal">15m</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let th of worker.backends[0]?.threads; let i = index">
+          <td class="pl-4">{{ i }}</td>
+          <td>{{ th.intensity }}</td>
+          <td>{{ th.affinity }}</td>
+          <td>
+            <hashrate [value]="th?.hashrate[0]"></hashrate>
+          </td>
+          <td>
+            <hashrate [value]="th?.hashrate[1]"></hashrate>
+          </td>
+          <td>
+            <hashrate [value]="th?.hashrate[2]"></hashrate>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

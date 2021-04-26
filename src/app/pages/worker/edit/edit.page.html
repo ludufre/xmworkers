@@ -1,0 +1,40 @@
+<div class="card mb-3">
+  <form [formGroup]="form" (ngSubmit)="submit($event)">
+    <h5 class="card-header">Edit worker<button class="btn btn-danger float-right" type="button"
+        (click)="modalService.open(modal, { size: 'lg' });">
+        <fa-icon icon="trash-alt"></fa-icon>
+      </button><button class="btn btn-primary float-right mr-2" type="submit">
+        <fa-icon icon="check"></fa-icon> Apply
+      </button></h5>
+    <div class="card-body">
+      <div class="form-group">
+        <label for="url">URL</label>
+        <input type="url" class="form-control autofocus" formControlName="url" placeholder="http://">
+      </div>
+      <div class="form-group mb-2">
+        <label for="token">Access token</label>
+        <input type="password" class="form-control" formControlName="token" placeholder="Optional">
+      </div>
+    </div>
+  </form>
+</div>
+
+<ng-template #modal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Delete worker</h5><button type="button" class="close"
+      (click)="modal.close()"><span>×</span></button>
+  </div>
+  <div class="alert alert-warning rounded-0 mb-0">
+    <fa-icon icon="exclamation-triangle"></fa-icon>
+    Are you sure you want to delete worker <b>{{ worker?.id }}</b>?
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger" (click)="delete()">
+      <fa-icon icon="trash-alt"></fa-icon>
+      Delete worker
+    </button>
+    <button type="button" class="btn btn-secondary hidden-xs" (click)="modal.close()">
+      Close
+    </button>
+  </div>
+</ng-template>

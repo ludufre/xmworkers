@@ -1,0 +1,26 @@
+<div class="card mb-3" [class.border-danger]="loaded && (err || invalid)">
+  <h5 class="card-header" [class.text-white]="loaded && (err || invalid)"
+    [class.bg-danger]="loaded && (err || invalid)">
+    JSON configuration
+    <button class="btn btn-secondary float-right" (click)="download()" [disabled]="!loaded || (err || invalid)">
+      <fa-icon icon="download"></fa-icon>
+      Download
+    </button>
+    <button class="btn btn-primary float-right mr-2" (click)="apply()" [disabled]="!loaded || (err || invalid)">
+      <fa-icon icon="check"></fa-icon>
+      Apply
+    </button>
+  </h5>
+  <div class="card-body" *ngIf="loaded && !err">
+    <div class="form-group mb-0">
+      <textarea class="form-control text-monospace" [class.is-invalid]="invalid" [(ngModel)]="config"
+        (ngModelChange)="configChange($event)" rows="16" spellcheck="false"></textarea>
+    </div>
+  </div>
+  <div class="card-body text-muted text-center" *ngIf="!loaded">
+    <fa-icon icon="spinner" [spin]="true" size="3x"></fa-icon>
+  </div>
+  <div class="card-body text-danger" *ngIf="loaded && err">
+    <fa-icon icon="exclamation-triangle"></fa-icon> Remote configuration is not available.
+  </div>
+</div>
