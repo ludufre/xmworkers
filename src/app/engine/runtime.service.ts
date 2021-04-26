@@ -16,7 +16,6 @@ export class RuntimeService {
   refresh = new BehaviorSubject<number>(5);
   viewing: IWorker;
   latest: string;
-  outdated = false;
 
   constructor(
     public ss: SecureStorageService,
@@ -37,11 +36,6 @@ export class RuntimeService {
 
     this.api.call(`https://api.github.com/repos/xmrig/xmrig/releases/latest`).then((latest: any) => {
       this.latest = latest.tag_name.replace(/[^0-9\.]/, '');
-
-      const checkOutdated = this.workers.filter(o => o.version !== latest);
-      if (checkOutdated.length > 0) {
-        this.outdated = true;
-      }
     });
   }
 
@@ -61,6 +55,11 @@ export class RuntimeService {
     this.refresh.subscribe(seconds => {
       this.ss.set('refresh', seconds);
     });
+  }
+
+  checkOutdate() {
+    const checkOutdated = this.workers.filter(o => !!o?.summary && o.summary.version !== this.latest);
+    return checkOutdated.length > 0;
   }
 
   getSummary(worker: IWorker): Promise<void> {
