@@ -1,6 +1,6 @@
 # XMWorkers - XMRig Open Source Dashboard
 
-Based on http://workers.xmrig.info, but Open Source and with some extras.
+Based on https://github.com/xmrig/xmrig-workers with some extras.
 
 I recently started in the mining world. But because of the price of GPUs I looked for an alternative to mine with CPU. So I got to know XMRig and started using it together with the dashboard made available by its creators. But I missed some things on that dashboard. So I decided to implement some things on my own.
 
@@ -39,7 +39,7 @@ You can import you current list in `Add` button. Just paste the exported URL fro
 
 ## Credits
 
-[@xmrig](https://github.com/xmrig) - creator of this amazing Miner and Dashboard
+[@xmrig](https://github.com/xmrig) - creator of this amazing [Miner](https://github.com/xmrig/xmrig) and [Dashboard](https://github.com/xmrig/xmrig-workers)
 
 ## Development
 
