@@ -59,7 +59,7 @@ export class DashboardPage implements OnInit {
           total = o.summary?.hashrate?.highest;
         }
       } else {
-        total += o.summary?.hashrate?.total[index];
+        total += o.summary?.hashrate?.total[index] || 0;
       }
     };
     return total;
