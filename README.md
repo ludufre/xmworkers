@@ -1,4 +1,4 @@
-# XMWorkers - XMRig Open Source Dashboard
+# XMWorkers - XMRig Dashboard
 
 Based on https://github.com/xmrig/xmrig-workers with some extras.
 
