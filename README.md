@@ -33,7 +33,7 @@ I chose to use Angular because it is a language that I feel more comfortable wit
 
 http://xmworkers.ludufre.com
 
-Because of lack support of HTTPS on Miner API, we can only host the dashboard without HTTPS... ([more details](https://love2dev.com/blog/chrome-mixed-content/))
+Because Chrome/Edge block mixed content (access HTTP from HTTPS) and normaly the Miners are configured without HTTPS/SSL, I hosted the dashboard without HTTPS... ([more details](https://love2dev.com/blog/chrome-mixed-content/))
 
 You can import you current list in `Add` button. Just paste the exported URL from original dashboard.
 
