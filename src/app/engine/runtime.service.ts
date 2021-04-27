@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as moment from 'moment';
-import { BehaviorSubject, interval } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { IBackend } from '../interfaces/backend.interface';
 import { ISavedWorker } from '../interfaces/saved-worker.interface';
 import { ISummary } from '../interfaces/summary.interface';
@@ -16,6 +16,7 @@ export class RuntimeService {
   refresh = new BehaviorSubject<number>(5);
   viewing: IWorker;
   latest: string;
+  cid: any;
 
   constructor(
     public ss: SecureStorageService,
@@ -24,7 +25,10 @@ export class RuntimeService {
   ) {
     this.getWorkers();
     this.getTimeout();
-    this.autoRefresh();
+
+    this.refresh.subscribe(seconds => {
+      this.ss.set('refresh', seconds);
+    });
   }
 
   async getWorkers() {
@@ -33,6 +37,7 @@ export class RuntimeService {
       ...worker,
       status: WorkerStatus.ERROR
     } as IWorker));
+    this.autoRefresh();
 
     this.api.call(`https://api.github.com/repos/xmrig/xmrig/releases/latest`).then((latest: any) => {
       this.latest = latest.tag_name.replace(/[^0-9\.]/, '');
@@ -45,16 +50,13 @@ export class RuntimeService {
   }
 
   async autoRefresh() {
-    setInterval(() => {
-      for (const worker of this.workers) {
-        if (moment().unix() - (worker.last || 0) >= this.refresh.value) {
-          this.getSummary(worker);
-        }
-      }
-    }, 1000);
-    this.refresh.subscribe(seconds => {
-      this.ss.set('refresh', seconds);
-    });
+    clearTimeout(this.cid);
+
+    for (const worker of this.workers) {
+      this.getSummary(worker);
+    }
+
+    this.cid = setTimeout(this.autoRefresh.bind(this), this.refresh.value * 1000);
   }
 
   checkOutdate() {
@@ -65,10 +67,13 @@ export class RuntimeService {
   getSummary(worker: IWorker): Promise<void> {
     return new Promise((ok) => {
       this.api.call(`${worker.url}/1/summary`, worker.token).then((summary: ISummary) => {
+        const save = worker.id !== summary.worker_id || worker.version !== summary.version;
         worker.summary = summary;
         worker.id = summary.worker_id;
         worker.version = summary.version;
-
+        if (save) {
+          this.ss.addOrUpdateWorker(worker);
+        }
 
         if (!!!summary.connection || !!!summary.hashrate || !!!summary.results) {
           worker.status = WorkerStatus.ERROR;
@@ -96,7 +101,7 @@ export class RuntimeService {
   getBackends(worker: IWorker): Promise<void> {
     return new Promise((ok) => {
       this.api.call(`${worker.url}/2/backends`, worker.token).then((backends: IBackend[]) => {
-        worker.backends = backends;
+        worker.backends = backends.filter(o => o.type === 'cpu');
       }, (err) => {
         worker.backends = null;
       }).finally(() => {

@@ -6,6 +6,8 @@ I recently started in the mining world. But because of the price of GPUs I looke
 
 I chose to use Angular because it is a language that I feel more comfortable with.
 
+Any suggestions or PR are welcome.
+
 ## Features
 
 ### Features from original dashboard
@@ -25,6 +27,7 @@ I chose to use Angular because it is a language that I feel more comfortable wit
 
 ### TO DO
 
+- Implement OpenCL and CUDA backend information
 - List of worker sort with all columns
 - Implement PIN authentication
 - (put your feature here)

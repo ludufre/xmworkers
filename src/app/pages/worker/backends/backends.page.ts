@@ -15,8 +15,8 @@ import * as moment from 'moment';
 export class WorkerBackendsPage implements OnInit, OnDestroy {
 
   worker: IWorker;
-  interval: any;
   loaded = false;
+  cid: any;
 
   constructor(
     public runtime: RuntimeService,
@@ -29,20 +29,18 @@ export class WorkerBackendsPage implements OnInit, OnDestroy {
   ngOnInit() {
     this.worker = this.runtime.viewing;
 
-    this.interval = setInterval(() => {
-      this.job();
-    }, this.runtime.refresh.value * 1000);
     this.job();
   }
 
   ngOnDestroy() {
-    clearInterval(this.interval);
+    clearTimeout(this.cid);
   }
 
   job() {
+    clearTimeout(this.cid);
     this.runtime.getBackends(this.worker).then(() => {
       this.loaded = true;
-    });
+    }).finally(() => this.cid = setTimeout(this.job.bind(this), this.runtime.refresh.value * 1000));
   }
 
   priority(p: number) {
