@@ -56,7 +56,7 @@ export class RuntimeService {
       this.getSummary(worker);
     }
 
-    this.cid = setTimeout(this.autoRefresh.bind(this), this.refresh.value * 1000);
+    this.cid = setTimeout(this.autoRefresh, this.refresh.value * 1000);
   }
 
   checkOutdate() {
