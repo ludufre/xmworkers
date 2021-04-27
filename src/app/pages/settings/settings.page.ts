@@ -2,6 +2,7 @@ import { Component, OnInit, } from '@angular/core';
 import { RuntimeService } from 'src/app/engine/runtime.service';
 import * as SimpleBase from 'simple-base';
 import { Events } from 'src/app/engine/events.service';
+import { version } from 'src/version';
 
 @Component({
   selector: 'app-settings',
@@ -11,6 +12,7 @@ import { Events } from 'src/app/engine/events.service';
 export class SettingsPage implements OnInit {
 
   refresh: number;
+  version = version;
 
   constructor(
     public runtime: RuntimeService,
