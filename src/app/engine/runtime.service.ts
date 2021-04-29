@@ -52,11 +52,11 @@ export class RuntimeService {
   async autoRefresh() {
     clearTimeout(this.cid);
 
-    for (const worker of this.workers) {
+    for (const worker of (this.workers || [])) {
       this.getSummary(worker);
     }
 
-    this.cid = setTimeout(this.autoRefresh, this.refresh.value * 1000);
+    this.cid = setTimeout(() => this.autoRefresh(), this.refresh.value * 1000);
   }
 
   checkOutdate() {
