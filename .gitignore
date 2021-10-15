@@ -46,3 +46,5 @@ testem.log
 Thumbs.db
 
 /.firebase
+/package-lock.json
+/yarn.lock

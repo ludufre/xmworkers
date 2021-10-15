@@ -24,6 +24,7 @@ Any suggestions or PR are welcome.
 - Sum of hashrate and results
 - Pause & Resume worker
 - Latest XMRig version checker
+- Add multiple workers at once
 
 ### TO DO
 

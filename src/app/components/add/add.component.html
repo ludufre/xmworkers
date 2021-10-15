@@ -7,15 +7,15 @@
     <div class="modal-body">
       <div class="form-group">
         <label for="url">URL</label>
-        <input type="url" class="form-control autofocus" formControlName="url" placeholder="http://">
+        <textarea type="text" class="form-control autofocus" formControlName="urls"
+          placeholder="http:// (One worker per line)"></textarea>
       </div>
       <div class="form-group mb-2">
         <label for="token">Access token</label>
         <input type="password" class="form-control" formControlName="token" placeholder="Optional">
       </div>
       <div class="form-group mb-2">
-        <label for="token">Or, import from <a href="http://workers.xmrig.info"
-            target="_blank">http://workers.xmrig.info</a></label>
+        <label>Or, import from <a href="http://workers.xmrig.info" target="_blank">http://workers.xmrig.info</a></label>
         <textarea class="form-control" formControlName="import"
           placeholder="Paste the Export url here. (http://workers.xmrig.info/import/A5Yb1e3...)"></textarea>
       </div>
@@ -25,8 +25,8 @@
     </div>
     <div class="modal-footer">
       <fa-icon icon="spinner" [spin]="true" size="lg" *ngIf="loading"></fa-icon>
-      <span class="text-danger" *ngIf="err">
-        <fa-icon icon="exclamation-triangle"></fa-icon> Failed to fetch
+      <span class="text-danger" *ngIf="!!err">
+        <fa-icon icon="exclamation-triangle"></fa-icon> {{ err }}
       </span>
       <button type="submit" class="btn btn-primary" [disabled]="!valid">
         <fa-icon icon="plus"></fa-icon> Add worker

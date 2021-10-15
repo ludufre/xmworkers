@@ -9,6 +9,7 @@ import { ISavedWorker } from 'src/app/interfaces/saved-worker.interface';
 import { ISummary } from 'src/app/interfaces/summary.interface';
 import * as SimpleBase from 'simple-base';
 import { GlobalService } from 'src/app/engine/global.service';
+import { forEach } from 'lodash';
 
 @Component({
   selector: 'add-modal',
@@ -19,7 +20,7 @@ export class AddModalComponent implements OnInit {
 
   @ViewChild('modal') modal: any;
   form: FormGroup;
-  err = false;
+  err: string;
   loading = false;
   valid = false;
 
@@ -35,7 +36,7 @@ export class AddModalComponent implements OnInit {
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      url: [''],
+      urls: [''],
       token: [''],
       import: ['']
     });
@@ -43,19 +44,30 @@ export class AddModalComponent implements OnInit {
     this.form.valueChanges.subscribe(() => {
       this.err = null;
 
-      if (
-        /^http:\/\//.test(this.form.get('url').value) ||
-        this.form.get('import')?.value?.length > 0
-      ) {
-        this.valid = true;
+      const urls: string[] = this.form.get('urls').value?.split('\n');
+
+      console.log(urls?.length);
+
+      if (urls?.length > 0) {
+        const fails = urls.filter(o => !/^http:\/\//.test(o.trim()));
+
+        if (fails.length > 0) {
+          this.valid = false;
+        } else {
+          this.valid = true;
+        }
       } else {
-        this.valid = false;
+        if (this.form.get('import')?.value?.length > 0) {
+          this.valid = true;
+        } else {
+          this.valid = false;
+        }
       }
     });
 
     this.events.subscribe('modal:add', () => {
       this.form.reset();
-      this.err = false;
+      this.err = null;
       this.loading = false;
       this.modalService.open(this.modal, { size: 'lg' });
     });
@@ -75,7 +87,7 @@ export class AddModalComponent implements OnInit {
       const decoded = SimpleBase.decode(encoded, 58);
       if (!this.g.isJSON(decoded)) {
         this.loading = false;
-        this.err = true;
+        this.err = 'Invalid import data';
         return;
       }
       const data = JSON.parse(decoded);
@@ -87,20 +99,28 @@ export class AddModalComponent implements OnInit {
       } as ISavedWorker)), true);
       this.modalService.dismissAll();
     } else {
-      this.api.call(`${this.form.get('url').value}/1/summary`, this.form.get('token').value).then((summary: ISummary) => {
-        this.runtime.add({
-          url: this.form.get('url').value,
-          token: this.form.get('token').value,
-          id: summary.worker_id,
-          version: summary.version
-        } as ISavedWorker);
+      const urls: string[] = this.form.get('urls').value.split('\n');
+      let ok = 0;
+      await this.g.asyncForEach(urls, async (url: string) => {
+        try {
+          const summary = await this.api.call(`${url}/1/summary`, this.form.get('token').value);
+          this.runtime.add({
+            url,
+            token: this.form.get('token').value,
+            id: summary.worker_id,
+            version: summary.version
+          } as ISavedWorker);
+          ok++;
+        } catch (err) {
+          this.g.toast(`Failed to fetch ${url}`, 'Oh!', 'error', 'top', 5000);
+          console.log(err);
+        }
+      });
+      this.loading = false;
+      if (ok === urls.length) {
+        this.g.toast(`Success!`, '', 'success', 'top', 5000);
         this.modalService.dismissAll();
-      }, (err) => {
-        console.error(err);
-        this.err = true;
-      }).finally(() =>
-        this.loading = false
-      );
+      }
     }
   }
 }
