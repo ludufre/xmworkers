@@ -26,7 +26,7 @@ export class ApiService {
       headers: hds
     };
     if (!!body) {
-      init['body'] = body;
+      init['body'] = typeof body === 'object' ? JSON.stringify(body) : body;
     }
 
     return new Promise((resolve, reject) => {
